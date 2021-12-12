@@ -1,47 +1,63 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 
 const getStateFromLocalStorage = () => {
   const storage = localStorage.getItem('counterState');
-  if (storage) return JSON.parse(storage);
+  if (storage) return JSON.parse(storage).count;
   return { count: 0 }
 }
 
-const storeStateInLocalStorage = (state) => {
-  localStorage.setItem('counterState', JSON.stringify(state));
+const useLocalStorage = (initialState, key) => {
+
+  const get = () =>{
+    const storage = localStorage.getItem(key);
+    if (storage) return JSON.parse(storage).value;
+    return initialState;
+  };
+
+  const [value, setValue] = useState(get());
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify({ value }))
+  }, [value]);
+
+  console.log(value);
+  return [value, setValue];
 }
 
-class Counter extends Component {
+const Counter = ({ step, max }) => {
 
-  constructor (props) {
-    super(props);
-    this.state = getStateFromLocalStorage();
+  const [count, setCount] = useLocalStorage(0, 'count');
+
+  const increment = () => {
+    // if (count < max ) 
+    setCount(count => count + step);
+    console.log(count);
   }
 
-  increment = () => {
-    this.setState((state, props) =>  { 
-      const { max, step } = props;
-      if (state.count >= max) return;  //returning undefined won't update the state
-      return { count: state.count + step } 
-    }, () => storeStateInLocalStorage(this.state))
-  };
-  
-  decrement = () => this.setState({ count: this.state.count - 1 });
-  reset = () => this.setState({ count: 0 });
-  
-  render() {
-    const { count } = this.state;
+  const decrement = () => setCount(count - step);
+  const reset = () => setCount(0);
 
-    return (
-      <div className="Counter">
-        <p className="count">{count}</p>
-        <section className="controls">
-          <button onClick={this.increment}>Increment</button>
-          <button onClick={this.decrement}>Decrement</button>
-          <button onClick={this.reset}>Reset</button>
-        </section>
-      </div>
-    );
-  }
+  
+
+  // useEffect (() =>{
+  //   storeStateInLocalStorage(count);
+  // }, [count]);
+
+  useEffect (() => {
+    document.title = `Simple Counter | ${count}`;
+  }, [count]);
+  
+  
+  return (
+    <div className="Counter">
+      <p className="count">{count}</p>
+      <section className="controls">
+        <button onClick={increment}>Increment</button>
+        <button onClick={decrement}>Decrement</button>
+        <button onClick={reset}>Reset</button>
+      </section>
+    </div>
+  );
 }
 
 export default Counter;
