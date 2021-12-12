@@ -24,6 +24,7 @@ class Counter extends Component {
       return { count: state.count + step } 
     }, () => storeStateInLocalStorage(this.state))
   };
+  
   decrement = () => this.setState({ count: this.state.count - 1 });
   reset = () => this.setState({ count: 0 });
   
